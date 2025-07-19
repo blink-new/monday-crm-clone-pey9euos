@@ -2,7 +2,7 @@ import { blink } from '../lib/blink'
 import type { Deal } from '../lib/blink'
 
 export class DealService {
-  static async createDeal(data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createDeal(data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) {
     const deal = await blink.db.deals.create({
       id: `deal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...data,
@@ -22,7 +22,7 @@ export class DealService {
     return deal
   }
 
-  static async getDeals(userId: string, filters?: {
+  async getDeals(userId: string, filters?: {
     stage?: string
     contactId?: string
     minValue?: number
@@ -55,7 +55,7 @@ export class DealService {
     return result
   }
 
-  static async getDealById(id: string): Promise<Deal | null> {
+  async getDealById(id: string): Promise<Deal | null> {
     const deals = await blink.db.deals.list({
       where: { id },
       limit: 1
@@ -64,7 +64,7 @@ export class DealService {
     return deals.length > 0 ? deals[0] : null
   }
 
-  static async updateDeal(id: string, data: Partial<Deal>) {
+  async updateDeal(id: string, data: Partial<Deal>) {
     const deal = await blink.db.deals.update(id, {
       ...data,
       updatedAt: new Date().toISOString()
@@ -84,11 +84,11 @@ export class DealService {
     return deal
   }
 
-  static async deleteDeal(id: string) {
+  async deleteDeal(id: string) {
     return await blink.db.deals.delete(id)
   }
 
-  static async getDealsByStage(userId: string) {
+  async getDealsByStage(userId: string) {
     const deals = await this.getDeals(userId)
     
     const stages = {
@@ -103,7 +103,7 @@ export class DealService {
     return stages
   }
 
-  static async getDealStats(userId: string) {
+  async getDealStats(userId: string) {
     const deals = await this.getDeals(userId)
     
     const stats = {
@@ -145,7 +145,7 @@ export class DealService {
     return stats
   }
 
-  static async moveDealToStage(id: string, stage: string, userId: string) {
+  async moveDealToStage(id: string, stage: string, userId: string) {
     const updateData: any = { stage, userId }
     
     // Set close date if moving to closed stages
@@ -156,14 +156,14 @@ export class DealService {
     return await this.updateDeal(id, updateData)
   }
 
-  static async getDealsByContact(contactId: string): Promise<Deal[]> {
+  async getDealsByContact(contactId: string): Promise<Deal[]> {
     return await blink.db.deals.list({
       where: { contactId },
       orderBy: { createdAt: 'desc' }
     })
   }
 
-  static async getUpcomingDeals(userId: string, days = 30): Promise<Deal[]> {
+  async getUpcomingDeals(userId: string, days = 30): Promise<Deal[]> {
     const deals = await this.getDeals(userId)
     const futureDate = new Date()
     futureDate.setDate(futureDate.getDate() + days)
@@ -175,7 +175,7 @@ export class DealService {
     )
   }
 
-  private static async logActivity(data: {
+  private async logActivity(data: {
     type: string
     entityType: string
     entityId: string
@@ -189,3 +189,6 @@ export class DealService {
     })
   }
 }
+
+export const dealService = new DealService()
+export default dealService

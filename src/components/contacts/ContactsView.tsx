@@ -18,6 +18,8 @@ import {
   Trash2
 } from 'lucide-react'
 import { contactService } from '@/services/contactService'
+import { ContactModal } from '@/components/modals/ContactModal'
+import { blink } from '@/lib/blink'
 
 interface Contact {
   id: string
@@ -46,6 +48,8 @@ export function ContactsView() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
 
   useEffect(() => {
     loadContacts()
@@ -57,7 +61,11 @@ export function ContactsView() {
 
   const loadContacts = async () => {
     try {
-      const contactsData = await contactService.getContacts()
+      const user = await blink.auth.me()
+      const contactsData = await blink.db.contacts.list({
+        where: { user_id: user.id },
+        orderBy: { created_at: 'desc' }
+      })
       setContacts(contactsData)
     } catch (error) {
       console.error('Failed to load contacts:', error)
@@ -104,6 +112,30 @@ export function ContactsView() {
     return tags.split(',').map(tag => tag.trim()).filter(Boolean)
   }
 
+  const handleAddContact = () => {
+    setSelectedContact(null)
+    setIsContactModalOpen(true)
+  }
+
+  const handleEditContact = (contact: Contact) => {
+    setSelectedContact(contact)
+    setIsContactModalOpen(true)
+  }
+
+  const handleSaveContact = (contact: Contact) => {
+    if (contact.id && contacts.find(c => c.id === contact.id)) {
+      // Update existing contact
+      setContacts(prev => prev.map(c => c.id === contact.id ? contact : c))
+    } else {
+      // Add new contact
+      setContacts(prev => [contact, ...prev])
+    }
+  }
+
+  const handleDeleteContact = (contactId: string) => {
+    setContacts(prev => prev.filter(c => c.id !== contactId))
+  }
+
   if (loading) {
     return (
       <div className="p-6">
@@ -127,7 +159,7 @@ export function ContactsView() {
           <h2 className="text-2xl font-semibold text-gray-900">Contacts</h2>
           <p className="text-gray-500 mt-1">{filteredContacts.length} contacts found</p>
         </div>
-        <Button className="gap-2">
+        <Button onClick={handleAddContact} className="gap-2">
           <Plus className="w-4 h-4" />
           Add Contact
         </Button>
@@ -181,7 +213,7 @@ export function ContactsView() {
               : "Try adjusting your search or filters."
             }
           </p>
-          <Button className="gap-2">
+          <Button onClick={handleAddContact} className="gap-2">
             <Plus className="w-4 h-4" />
             Add Contact
           </Button>
@@ -285,7 +317,12 @@ export function ContactsView() {
                     <Phone className="w-4 h-4" />
                     Call
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => handleEditContact(contact)}
+                  >
                     <Edit className="w-4 h-4" />
                   </Button>
                 </div>
@@ -294,6 +331,15 @@ export function ContactsView() {
           ))}
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        contact={selectedContact}
+        onSave={handleSaveContact}
+        onDelete={handleDeleteContact}
+      />
     </div>
   )
 }

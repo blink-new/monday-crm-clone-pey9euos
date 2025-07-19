@@ -2,7 +2,7 @@ import { blink } from '../lib/blink'
 import type { Contact } from '../lib/blink'
 
 export class ContactService {
-  static async createContact(data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createContact(data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) {
     const contact = await blink.db.contacts.create({
       id: `contact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...data,
@@ -23,7 +23,7 @@ export class ContactService {
     return contact
   }
 
-  static async getContacts(userId: string, filters?: {
+  async getContacts(userId: string, filters?: {
     status?: string
     source?: string
     search?: string
@@ -62,7 +62,7 @@ export class ContactService {
     return result
   }
 
-  static async getContactById(id: string): Promise<Contact | null> {
+  async getContactById(id: string): Promise<Contact | null> {
     const contacts = await blink.db.contacts.list({
       where: { id },
       limit: 1
@@ -77,7 +77,7 @@ export class ContactService {
     }
   }
 
-  static async updateContact(id: string, data: Partial<Contact>) {
+  async updateContact(id: string, data: Partial<Contact>) {
     const updateData = {
       ...data,
       updatedAt: new Date().toISOString()
@@ -90,11 +90,11 @@ export class ContactService {
     return await blink.db.contacts.update(id, updateData)
   }
 
-  static async deleteContact(id: string) {
+  async deleteContact(id: string) {
     return await blink.db.contacts.delete(id)
   }
 
-  static async getContactStats(userId: string) {
+  async getContactStats(userId: string) {
     const contacts = await this.getContacts(userId)
     
     const stats = {
@@ -114,11 +114,11 @@ export class ContactService {
     return stats
   }
 
-  static async searchContacts(userId: string, query: string): Promise<Contact[]> {
+  async searchContacts(userId: string, query: string): Promise<Contact[]> {
     return this.getContacts(userId, { search: query })
   }
 
-  static async addContactTag(id: string, tag: string) {
+  async addContactTag(id: string, tag: string) {
     const contact = await this.getContactById(id)
     if (!contact) throw new Error('Contact not found')
 
@@ -131,7 +131,7 @@ export class ContactService {
     return tags
   }
 
-  static async removeContactTag(id: string, tag: string) {
+  async removeContactTag(id: string, tag: string) {
     const contact = await this.getContactById(id)
     if (!contact) throw new Error('Contact not found')
 
@@ -141,7 +141,7 @@ export class ContactService {
     return tags
   }
 
-  private static async logActivity(data: {
+  private async logActivity(data: {
     type: string
     entityType: string
     entityId: string
@@ -156,7 +156,7 @@ export class ContactService {
   }
 
   // Simplified method for frontend
-  static async getContacts() {
+  async getContacts() {
     // Mock data for now
     return [
       {

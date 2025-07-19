@@ -1,7 +1,7 @@
 import { blink } from '../lib/blink'
-import { ContactService } from './contactService'
-import { DealService } from './dealService'
-import { BoardService } from './boardService'
+import { contactService } from './contactService'
+import { dealService } from './dealService'
+import { boardService } from './boardService'
 
 export interface DashboardStats {
   contacts: {
@@ -43,7 +43,7 @@ export interface ChartData {
 }
 
 export class AnalyticsService {
-  static async getDashboardStats(): Promise<any> {
+  async getDashboardStats(): Promise<any> {
     // Simplified version for now - return mock data
     return {
       totalContacts: 127,
@@ -57,11 +57,11 @@ export class AnalyticsService {
     }
   }
 
-  static async getDashboardStatsDetailed(userId: string): Promise<DashboardStats> {
+  async getDashboardStatsDetailed(userId: string): Promise<DashboardStats> {
     // Get current data
     const [contactStats, dealStats, tasks, activities] = await Promise.all([
-      ContactService.getContactStats(userId),
-      DealService.getDealStats(userId),
+      contactService.getContactStats(userId),
+      dealService.getDealStats(userId),
       this.getTaskStats(userId),
       this.getActivityStats(userId)
     ])
@@ -101,8 +101,8 @@ export class AnalyticsService {
     }
   }
 
-  static async getContactsChart(userId: string): Promise<ChartData> {
-    const contacts = await ContactService.getContacts(userId)
+  async getContactsChart(userId: string): Promise<ChartData> {
+    const contacts = await contactService.getContacts(userId)
     
     // Group by month for the last 6 months
     const months = this.getLast6Months()
@@ -124,8 +124,8 @@ export class AnalyticsService {
     }
   }
 
-  static async getDealsChart(userId: string): Promise<ChartData> {
-    const deals = await DealService.getDeals(userId)
+  async getDealsChart(userId: string): Promise<ChartData> {
+    const deals = await dealService.getDeals(userId)
     
     // Group by stage
     const stages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
@@ -146,8 +146,8 @@ export class AnalyticsService {
     }
   }
 
-  static async getRevenueChart(userId: string): Promise<ChartData> {
-    const deals = await DealService.getDeals(userId)
+  async getRevenueChart(userId: string): Promise<ChartData> {
+    const deals = await dealService.getDeals(userId)
     const wonDeals = deals.filter(deal => deal.stage === 'closed_won' && deal.actualCloseDate)
     
     // Group by month for the last 6 months
@@ -169,12 +169,12 @@ export class AnalyticsService {
     }
   }
 
-  static async getTaskCompletionChart(userId: string): Promise<ChartData> {
-    const boards = await BoardService.getBoards(userId)
+  async getTaskCompletionChart(userId: string): Promise<ChartData> {
+    const boards = await boardService.getBoards(userId)
     const allTasks = []
     
     for (const board of boards) {
-      const tasks = await BoardService.getTasks(board.id)
+      const tasks = await boardService.getTasks(board.id)
       allTasks.push(...tasks)
     }
 
@@ -214,16 +214,16 @@ export class AnalyticsService {
     }
   }
 
-  static async getActivityTimeline(userId: string, limit = 20) {
-    return await BoardService.getActivities(undefined, limit)
+  async getActivityTimeline(userId: string, limit = 20) {
+    return await boardService.getActivities(undefined, limit)
   }
 
-  private static async getTaskStats(userId: string) {
-    const boards = await BoardService.getBoards(userId)
+  private async getTaskStats(userId: string) {
+    const boards = await boardService.getBoards(userId)
     const allTasks = []
     
     for (const board of boards) {
-      const tasks = await BoardService.getTasks(board.id)
+      const tasks = await boardService.getTasks(board.id)
       allTasks.push(...tasks)
     }
 
@@ -241,8 +241,8 @@ export class AnalyticsService {
     }
   }
 
-  private static async getActivityStats(userId: string) {
-    const activities = await BoardService.getActivities()
+  private async getActivityStats(userId: string) {
+    const activities = await boardService.getActivities()
     const userActivities = activities.filter(activity => activity.userId === userId)
     
     const thisWeek = new Date()
@@ -258,12 +258,12 @@ export class AnalyticsService {
     }
   }
 
-  private static calculateGrowth(current: number, previous: number): number {
+  private calculateGrowth(current: number, previous: number): number {
     if (previous === 0) return current > 0 ? 100 : 0
     return ((current - previous) / previous) * 100
   }
 
-  private static getLast6Months(): string[] {
+  private getLast6Months(): string[] {
     const months = []
     const now = new Date()
     
@@ -275,7 +275,7 @@ export class AnalyticsService {
     return months
   }
 
-  private static getLast8Weeks(): string[] {
+  private getLast8Weeks(): string[] {
     const weeks = []
     const now = new Date()
     
@@ -287,13 +287,13 @@ export class AnalyticsService {
     return weeks
   }
 
-  private static getWeekString(date: Date): string {
+  private getWeekString(date: Date): string {
     const year = date.getFullYear()
     const week = this.getWeekNumber(date)
     return `${year}-W${week.toString().padStart(2, '0')}`
   }
 
-  private static getWeekNumber(date: Date): number {
+  private getWeekNumber(date: Date): number {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
     const dayNum = d.getUTCDay() || 7
     d.setUTCDate(d.getUTCDate() + 4 - dayNum)

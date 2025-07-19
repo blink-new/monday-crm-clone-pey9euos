@@ -7,6 +7,12 @@ import { TopBar } from './components/layout/TopBar'
 import { DashboardView } from './components/dashboard/DashboardView'
 import { BoardsView } from './components/boards/BoardsView'
 import { ContactsView } from './components/contacts/ContactsView'
+import { DealsView } from './components/deals/DealsView'
+import { AnalyticsView } from './components/analytics/AnalyticsView'
+import { SettingsView } from './components/settings/SettingsView'
+import { ContactModal } from './components/modals/ContactModal'
+import { DealModal } from './components/modals/DealModal'
+import { BoardModal } from './components/modals/BoardModal'
 
 interface User {
   id: string
@@ -18,6 +24,9 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState('dashboard')
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [isDealModalOpen, setIsDealModalOpen] = useState(false)
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
@@ -41,9 +50,9 @@ function App() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-2xl">M</span>
+              <span className="text-white font-bold text-2xl">L</span>
             </div>
-            <CardTitle className="text-2xl">Monday CRM</CardTitle>
+            <CardTitle className="text-2xl">LEVERAGE CRM</CardTitle>
             <p className="text-gray-500">Please sign in to continue</p>
           </CardHeader>
           <CardContent>
@@ -83,6 +92,20 @@ function App() {
     }
   }
 
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'add-contact':
+        setIsContactModalOpen(true)
+        break
+      case 'create-deal':
+        setIsDealModalOpen(true)
+        break
+      case 'new-board':
+        setIsBoardModalOpen(true)
+        break
+    }
+  }
+
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
@@ -92,32 +115,11 @@ function App() {
       case 'contacts':
         return <ContactsView />
       case 'deals':
-        return (
-          <div className="p-6">
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Deals View</h3>
-              <p className="text-gray-500">Coming soon...</p>
-            </div>
-          </div>
-        )
+        return <DealsView />
       case 'analytics':
-        return (
-          <div className="p-6">
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics View</h3>
-              <p className="text-gray-500">Coming soon...</p>
-            </div>
-          </div>
-        )
+        return <AnalyticsView />
       case 'settings':
-        return (
-          <div className="p-6">
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Settings View</h3>
-              <p className="text-gray-500">Coming soon...</p>
-            </div>
-          </div>
-        )
+        return <SettingsView />
       default:
         return <DashboardView />
     }
@@ -126,7 +128,11 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <Sidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView}
+        onQuickAction={handleQuickAction}
+      />
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -141,6 +147,25 @@ function App() {
           {renderView()}
         </div>
       </div>
+
+      {/* Global Modals */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        onSave={() => {}} // Will be handled by individual views
+      />
+      
+      <DealModal
+        isOpen={isDealModalOpen}
+        onClose={() => setIsDealModalOpen(false)}
+        onSave={() => {}} // Will be handled by individual views
+      />
+      
+      <BoardModal
+        isOpen={isBoardModalOpen}
+        onClose={() => setIsBoardModalOpen(false)}
+        onSave={() => {}} // Will be handled by individual views
+      />
     </div>
   )
 }

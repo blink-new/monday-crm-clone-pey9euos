@@ -1,27 +1,22 @@
-import { BoardService } from './boardService'
-import { ContactService } from './contactService'
-import { DealService } from './dealService'
+import { blink } from '../lib/blink'
 
 export class SeedService {
-  static async seedSampleData(userId: string) {
+  static async seedSampleData() {
     try {
       console.log('🌱 Starting to seed sample data...')
-
-      // Create sample boards
-      const boards = await this.createSampleBoards(userId)
-      console.log('✅ Created sample boards')
+      const user = await blink.auth.me()
 
       // Create sample contacts
-      const contacts = await this.createSampleContacts(userId)
+      await this.createSampleContacts(user.id)
       console.log('✅ Created sample contacts')
 
       // Create sample deals
-      await this.createSampleDeals(userId, contacts)
+      await this.createSampleDeals(user.id)
       console.log('✅ Created sample deals')
 
-      // Create sample tasks
-      await this.createSampleTasks(userId, boards)
-      console.log('✅ Created sample tasks')
+      // Create sample boards
+      await this.createSampleBoards(user.id)
+      console.log('✅ Created sample boards')
 
       console.log('🎉 Sample data seeded successfully!')
       return true
@@ -31,291 +26,273 @@ export class SeedService {
     }
   }
 
-  private static async createSampleBoards(userId: string) {
-    const boardsData = [
-      {
-        name: 'Product Development',
-        description: 'Track product development tasks and milestones',
-        color: '#6C5CE7',
-        userId,
-        teamMembers: []
-      },
-      {
-        name: 'Marketing Campaign',
-        description: 'Manage marketing campaigns and content creation',
-        color: '#00D9FF',
-        userId,
-        teamMembers: []
-      },
-      {
-        name: 'Customer Support',
-        description: 'Handle customer inquiries and support tickets',
-        color: '#FF6B6B',
-        userId,
-        teamMembers: []
-      }
-    ]
-
-    const boards = []
-    for (const boardData of boardsData) {
-      const board = await BoardService.createBoard(boardData)
-      boards.push(board)
-    }
-
-    return boards
-  }
-
   private static async createSampleContacts(userId: string) {
     const contactsData = [
       {
-        firstName: 'John',
-        lastName: 'Smith',
+        id: `contact_${Date.now()}_1`,
+        name: 'John Smith',
         email: 'john.smith@techcorp.com',
         phone: '+1-555-0123',
         company: 'TechCorp Inc.',
         position: 'CTO',
-        status: 'customer' as const,
-        source: 'website' as const,
-        tags: ['enterprise', 'tech'],
+        status: 'customer',
+        tags: 'enterprise,tech',
         notes: 'Key decision maker for enterprise solutions',
-        userId
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        firstName: 'Sarah',
-        lastName: 'Johnson',
+        id: `contact_${Date.now()}_2`,
+        name: 'Sarah Johnson',
         email: 'sarah.j@innovate.io',
         phone: '+1-555-0124',
         company: 'Innovate Solutions',
         position: 'Product Manager',
-        status: 'prospect' as const,
-        source: 'referral' as const,
-        tags: ['saas', 'product'],
+        status: 'prospect',
+        tags: 'saas,product',
         notes: 'Interested in our SaaS platform',
-        userId
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        firstName: 'Michael',
-        lastName: 'Chen',
+        id: `contact_${Date.now()}_3`,
+        name: 'Michael Chen',
         email: 'mchen@startup.co',
         phone: '+1-555-0125',
         company: 'StartupCo',
         position: 'Founder',
-        status: 'lead' as const,
-        source: 'social' as const,
-        tags: ['startup', 'founder'],
+        status: 'lead',
+        tags: 'startup,founder',
         notes: 'Met at tech conference, very interested',
-        userId
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        firstName: 'Emily',
-        lastName: 'Davis',
+        id: `contact_${Date.now()}_4`,
+        name: 'Emily Davis',
         email: 'emily.davis@enterprise.com',
         phone: '+1-555-0126',
         company: 'Enterprise Corp',
         position: 'VP Sales',
-        status: 'prospect' as const,
-        source: 'email' as const,
-        tags: ['enterprise', 'sales'],
+        status: 'prospect',
+        tags: 'enterprise,sales',
         notes: 'Looking for team collaboration tools',
-        userId
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        firstName: 'David',
-        lastName: 'Wilson',
+        id: `contact_${Date.now()}_5`,
+        name: 'David Wilson',
         email: 'dwilson@agency.com',
         phone: '+1-555-0127',
         company: 'Creative Agency',
         position: 'Creative Director',
-        status: 'lead' as const,
-        source: 'website' as const,
-        tags: ['agency', 'creative'],
+        status: 'lead',
+        tags: 'agency,creative',
         notes: 'Needs project management solution',
-        userId
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       }
     ]
 
-    const contacts = []
     for (const contactData of contactsData) {
-      const contact = await ContactService.createContact(contactData)
-      contacts.push(contact)
+      await blink.db.contacts.create(contactData)
     }
 
-    return contacts
+    return contactsData
   }
 
-  private static async createSampleDeals(userId: string, contacts: any[]) {
+  private static async createSampleDeals(userId: string) {
     const dealsData = [
       {
+        id: `deal_${Date.now()}_1`,
         title: 'Enterprise Platform License',
-        contactId: contacts[0].id,
+        description: 'Large enterprise deal with multi-year contract potential',
         value: 50000,
-        currency: 'USD',
-        stage: 'proposal' as const,
+        stage: 'proposal',
         probability: 75,
-        expectedCloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: 'Large enterprise deal with multi-year contract potential',
-        userId
+        expected_close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        contact_id: '',
+        assigned_to: 'John Doe',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
+        id: `deal_${Date.now()}_2`,
         title: 'SaaS Subscription',
-        contactId: contacts[1].id,
+        description: 'Annual subscription with growth potential',
         value: 12000,
-        currency: 'USD',
-        stage: 'negotiation' as const,
+        stage: 'negotiation',
         probability: 60,
-        expectedCloseDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: 'Annual subscription with growth potential',
-        userId
+        expected_close_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        contact_id: '',
+        assigned_to: 'Sarah Smith',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
+        id: `deal_${Date.now()}_3`,
         title: 'Startup Package',
-        contactId: contacts[2].id,
+        description: 'Startup discount package',
         value: 5000,
-        currency: 'USD',
-        stage: 'qualified' as const,
+        stage: 'qualified',
         probability: 40,
-        expectedCloseDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: 'Startup discount package',
-        userId
+        expected_close_date: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+        contact_id: '',
+        assigned_to: 'Mike Johnson',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
+        id: `deal_${Date.now()}_4`,
         title: 'Team Collaboration Suite',
-        contactId: contacts[3].id,
+        description: 'Enterprise team solution',
         value: 25000,
-        currency: 'USD',
-        stage: 'proposal' as const,
+        stage: 'proposal',
         probability: 80,
-        expectedCloseDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: 'Enterprise team solution',
-        userId
+        expected_close_date: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+        contact_id: '',
+        assigned_to: 'Emily Davis',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
+        id: `deal_${Date.now()}_5`,
         title: 'Project Management Tool',
-        contactId: contacts[4].id,
+        description: 'Agency project management needs',
         value: 8000,
-        currency: 'USD',
-        stage: 'lead' as const,
+        stage: 'lead',
         probability: 25,
-        expectedCloseDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: 'Agency project management needs',
-        userId
+        expected_close_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+        contact_id: '',
+        assigned_to: 'David Wilson',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       }
     ]
 
     for (const dealData of dealsData) {
-      await DealService.createDeal(dealData)
+      await blink.db.deals.create(dealData)
     }
+
+    return dealsData
   }
 
-  private static async createSampleTasks(userId: string, boards: any[]) {
-    const tasksData = [
-      // Product Development Board Tasks
+  private static async createSampleBoards(userId: string) {
+    const boardsData = [
       {
-        boardId: boards[0].id,
-        title: 'Design new user dashboard',
-        description: 'Create wireframes and mockups for the new user dashboard interface',
-        status: 'in_progress' as const,
-        priority: 'high' as const,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        position: 0,
-        userId
+        id: `board_${Date.now()}_1`,
+        name: 'Product Development',
+        description: 'Track product development tasks and milestones',
+        color: '#6C5CE7',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        boardId: boards[0].id,
-        title: 'Implement user authentication',
-        description: 'Set up secure user authentication system with JWT tokens',
-        status: 'completed' as const,
-        priority: 'critical' as const,
-        position: 1,
-        userId
+        id: `board_${Date.now()}_2`,
+        name: 'Marketing Campaign',
+        description: 'Manage marketing campaigns and content creation',
+        color: '#00D9FF',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       },
       {
-        boardId: boards[0].id,
-        title: 'Database optimization',
-        description: 'Optimize database queries for better performance',
-        status: 'not_started' as const,
-        priority: 'medium' as const,
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        position: 2,
-        userId
-      },
-
-      // Marketing Campaign Board Tasks
-      {
-        boardId: boards[1].id,
-        title: 'Create social media content',
-        description: 'Develop content calendar and create posts for social media',
-        status: 'in_progress' as const,
-        priority: 'medium' as const,
-        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-        position: 0,
-        userId
-      },
-      {
-        boardId: boards[1].id,
-        title: 'Launch email campaign',
-        description: 'Design and send newsletter to subscriber list',
-        status: 'not_started' as const,
-        priority: 'high' as const,
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-        position: 1,
-        userId
-      },
-
-      // Customer Support Board Tasks
-      {
-        boardId: boards[2].id,
-        title: 'Update FAQ section',
-        description: 'Review and update frequently asked questions',
-        status: 'completed' as const,
-        priority: 'low' as const,
-        position: 0,
-        userId
-      },
-      {
-        boardId: boards[2].id,
-        title: 'Respond to customer inquiries',
-        description: 'Address pending customer support tickets',
-        status: 'in_progress' as const,
-        priority: 'high' as const,
-        dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-        position: 1,
-        userId
+        id: `board_${Date.now()}_3`,
+        name: 'Customer Support',
+        description: 'Handle customer inquiries and support tickets',
+        color: '#FF6B6B',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: userId
       }
     ]
 
-    // Get columns for each board and assign tasks to appropriate columns
-    for (const board of boards) {
-      const columns = await BoardService.getColumns(board.id)
-      const boardTasks = tasksData.filter(task => task.boardId === board.id)
+    for (const boardData of boardsData) {
+      await blink.db.boards.create(boardData)
 
-      for (const task of boardTasks) {
-        let columnId = columns[0]?.id // Default to first column
+      // Create default columns for each board
+      const defaultColumns = [
+        { name: 'To Do', color: '#FF6B6B', position: 0 },
+        { name: 'In Progress', color: '#4ECDC4', position: 1 },
+        { name: 'Review', color: '#45B7D1', position: 2 },
+        { name: 'Done', color: '#96CEB4', position: 3 }
+      ]
 
-        // Assign to appropriate column based on status
-        switch (task.status) {
-          case 'not_started':
-            columnId = columns.find(col => col.name.toLowerCase().includes('to do') || col.name.toLowerCase().includes('todo'))?.id || columns[0]?.id
-            break
-          case 'in_progress':
-            columnId = columns.find(col => col.name.toLowerCase().includes('progress'))?.id || columns[1]?.id
-            break
-          case 'completed':
-            columnId = columns.find(col => col.name.toLowerCase().includes('done'))?.id || columns[columns.length - 1]?.id
-            break
+      const createdColumns = []
+      for (const col of defaultColumns) {
+        const column = await blink.db.board_columns.create({
+          id: `col_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          board_id: boardData.id,
+          user_id: userId,
+          ...col,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        createdColumns.push(column)
+      }
+
+      // Create sample tasks for each board
+      const tasksData = [
+        {
+          title: 'Design new user dashboard',
+          description: 'Create wireframes and mockups for the new user dashboard interface',
+          status: 'in-progress',
+          priority: 'high',
+          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          assigned_to: 'John Doe',
+          column_id: createdColumns[1].id, // In Progress
+          position: 0
+        },
+        {
+          title: 'Implement user authentication',
+          description: 'Set up secure user authentication system with JWT tokens',
+          status: 'completed',
+          priority: 'urgent',
+          assigned_to: 'Sarah Smith',
+          column_id: createdColumns[3].id, // Done
+          position: 0
+        },
+        {
+          title: 'Database optimization',
+          description: 'Optimize database queries for better performance',
+          status: 'not-started',
+          priority: 'medium',
+          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          assigned_to: 'Mike Johnson',
+          column_id: createdColumns[0].id, // To Do
+          position: 0
         }
+      ]
 
-        await BoardService.createTask({
-          ...task,
-          columnId: columnId || columns[0].id
+      for (const taskData of tasksData) {
+        await blink.db.tasks.create({
+          id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          ...taskData,
+          board_id: boardData.id,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
       }
     }
+
+    return boardsData
   }
 
   static async seedAllData() {
-    // Simplified version for frontend
-    return this.seedSampleData('current-user')
+    return this.seedSampleData()
   }
 }
 

@@ -17,6 +17,7 @@ import {
 interface SidebarProps {
   activeView: string
   onViewChange: (view: string) => void
+  onQuickAction?: (action: string) => void
 }
 
 const menuItems = [
@@ -28,16 +29,16 @@ const menuItems = [
   { id: 'settings', label: 'Settings', icon: Settings, badge: null },
 ]
 
-export function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, onQuickAction }: SidebarProps) {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">M</span>
+            <span className="text-white font-bold text-sm">L</span>
           </div>
-          <span className="font-semibold text-gray-900">Monday CRM</span>
+          <span className="font-semibold text-gray-900">LEVERAGE CRM</span>
         </div>
         
         {/* Search */}
@@ -94,15 +95,30 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
             Quick Actions
           </h3>
           <div className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start gap-2"
+              onClick={() => onQuickAction?.('new-board')}
+            >
               <Plus className="w-4 h-4" />
               New Board
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start gap-2"
+              onClick={() => onQuickAction?.('add-contact')}
+            >
               <Users className="w-4 h-4" />
               Add Contact
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start gap-2"
+              onClick={() => onQuickAction?.('create-deal')}
+            >
               <DollarSign className="w-4 h-4" />
               Create Deal
             </Button>

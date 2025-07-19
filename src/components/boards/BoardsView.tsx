@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { boardService } from '@/services/boardService'
+import { blink } from '@/lib/blink'
 
 interface Board {
   id: string
@@ -81,7 +82,11 @@ export function BoardsView() {
 
   const loadBoards = async () => {
     try {
-      const boardsData = await boardService.getBoards()
+      const user = await blink.auth.me()
+      const boardsData = await blink.db.boards.list({
+        where: { user_id: user.id },
+        orderBy: { created_at: 'desc' }
+      })
       setBoards(boardsData)
       if (boardsData.length > 0 && !selectedBoard) {
         setSelectedBoard(boardsData[0])
@@ -96,8 +101,14 @@ export function BoardsView() {
   const loadBoardData = async (boardId: string) => {
     try {
       const [columnsData, tasksData] = await Promise.all([
-        boardService.getBoardColumns(boardId),
-        boardService.getBoardTasks(boardId)
+        blink.db.board_columns.list({
+          where: { board_id: boardId },
+          orderBy: { position: 'asc' }
+        }),
+        blink.db.tasks.list({
+          where: { board_id: boardId },
+          orderBy: { position: 'asc' }
+        })
       ])
       setColumns(columnsData)
       setTasks(tasksData)

@@ -3,7 +3,7 @@ import type { Board, BoardColumn, Task } from '../lib/blink'
 
 export class BoardService {
   // Board operations
-  static async createBoard(data: Omit<Board, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createBoard(data: Omit<Board, 'id' | 'createdAt' | 'updatedAt'>) {
     const board = await blink.db.boards.create({
       id: `board_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...data,
@@ -18,7 +18,7 @@ export class BoardService {
     return board
   }
 
-  static async getBoards(userId: string): Promise<Board[]> {
+  async getBoards(userId: string): Promise<Board[]> {
     const boards = await blink.db.boards.list({
       where: { userId },
       orderBy: { createdAt: 'desc' }
@@ -30,7 +30,7 @@ export class BoardService {
     }))
   }
 
-  static async getBoardById(id: string): Promise<Board | null> {
+  async getBoardById(id: string): Promise<Board | null> {
     const boards = await blink.db.boards.list({
       where: { id },
       limit: 1
@@ -45,7 +45,7 @@ export class BoardService {
     }
   }
 
-  static async updateBoard(id: string, data: Partial<Board>) {
+  async updateBoard(id: string, data: Partial<Board>) {
     const updateData = {
       ...data,
       updatedAt: new Date().toISOString()
@@ -58,12 +58,12 @@ export class BoardService {
     return await blink.db.boards.update(id, updateData)
   }
 
-  static async deleteBoard(id: string) {
+  async deleteBoard(id: string) {
     return await blink.db.boards.delete(id)
   }
 
   // Column operations
-  static async createDefaultColumns(boardId: string, userId: string) {
+  async createDefaultColumns(boardId: string, userId: string) {
     const defaultColumns = [
       { name: 'To Do', color: '#FF6B6B', position: 0 },
       { name: 'In Progress', color: '#4ECDC4', position: 1 },
@@ -83,7 +83,7 @@ export class BoardService {
     }
   }
 
-  static async createColumn(data: Omit<BoardColumn, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createColumn(data: Omit<BoardColumn, 'id' | 'createdAt' | 'updatedAt'>) {
     return await blink.db.boardColumns.create({
       id: `col_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...data,
@@ -92,26 +92,26 @@ export class BoardService {
     })
   }
 
-  static async getColumns(boardId: string): Promise<BoardColumn[]> {
+  async getColumns(boardId: string): Promise<BoardColumn[]> {
     return await blink.db.boardColumns.list({
       where: { boardId },
       orderBy: { position: 'asc' }
     })
   }
 
-  static async updateColumn(id: string, data: Partial<BoardColumn>) {
+  async updateColumn(id: string, data: Partial<BoardColumn>) {
     return await blink.db.boardColumns.update(id, {
       ...data,
       updatedAt: new Date().toISOString()
     })
   }
 
-  static async deleteColumn(id: string) {
+  async deleteColumn(id: string) {
     return await blink.db.boardColumns.delete(id)
   }
 
   // Task operations
-  static async createTask(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createTask(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) {
     const task = await blink.db.tasks.create({
       id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...data,
@@ -131,21 +131,21 @@ export class BoardService {
     return task
   }
 
-  static async getTasks(boardId: string): Promise<Task[]> {
+  async getTasks(boardId: string): Promise<Task[]> {
     return await blink.db.tasks.list({
       where: { boardId },
       orderBy: { position: 'asc' }
     })
   }
 
-  static async getTasksByColumn(columnId: string): Promise<Task[]> {
+  async getTasksByColumn(columnId: string): Promise<Task[]> {
     return await blink.db.tasks.list({
       where: { columnId },
       orderBy: { position: 'asc' }
     })
   }
 
-  static async updateTask(id: string, data: Partial<Task>) {
+  async updateTask(id: string, data: Partial<Task>) {
     const task = await blink.db.tasks.update(id, {
       ...data,
       updatedAt: new Date().toISOString()
@@ -165,11 +165,11 @@ export class BoardService {
     return task
   }
 
-  static async deleteTask(id: string) {
+  async deleteTask(id: string) {
     return await blink.db.tasks.delete(id)
   }
 
-  static async moveTask(taskId: string, newColumnId: string, newPosition: number, userId: string) {
+  async moveTask(taskId: string, newColumnId: string, newPosition: number, userId: string) {
     return await this.updateTask(taskId, {
       columnId: newColumnId,
       position: newPosition,
@@ -178,7 +178,7 @@ export class BoardService {
   }
 
   // Activity logging
-  private static async logActivity(data: {
+  private async logActivity(data: {
     type: string
     entityType: string
     entityId: string
@@ -192,7 +192,7 @@ export class BoardService {
     })
   }
 
-  static async getActivities(entityId?: string, limit = 50) {
+  async getActivities(entityId?: string, limit = 50) {
     const where = entityId ? { entityId } : {}
     return await blink.db.activities.list({
       where,
@@ -202,7 +202,7 @@ export class BoardService {
   }
 
   // Simplified methods for frontend
-  static async getBoards() {
+  async getBoards() {
     // Mock data for now
     return [
       {
@@ -232,7 +232,7 @@ export class BoardService {
     ]
   }
 
-  static async getBoardColumns(boardId: string) {
+  async getBoardColumns(boardId: string) {
     // Mock columns
     return [
       { id: 'col_1', board_id: boardId, name: 'To Do', color: '#FF6B6B', position: 0 },
@@ -242,7 +242,7 @@ export class BoardService {
     ]
   }
 
-  static async getBoardTasks(boardId: string) {
+  async getBoardTasks(boardId: string) {
     // Mock tasks
     return [
       {
