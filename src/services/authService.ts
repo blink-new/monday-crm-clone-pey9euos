@@ -7,8 +7,8 @@ export class AuthService {
       const user = await blink.auth.me()
       return {
         id: user.id,
-        email: user.email,
-        displayName: user.displayName || user.email.split('@')[0],
+        email: user.email || '',
+        displayName: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
         avatar: user.avatar,
         role: 'admin', // Default role for now
         createdAt: new Date().toISOString(),
@@ -56,8 +56,8 @@ export class AuthService {
       if (state.user) {
         user = {
           id: state.user.id,
-          email: state.user.email,
-          displayName: state.user.displayName || state.user.email.split('@')[0],
+          email: state.user.email || '',
+          displayName: state.user.displayName || (state.user.email ? state.user.email.split('@')[0] : 'User'),
           avatar: state.user.avatar,
           role: 'admin',
           createdAt: new Date().toISOString(),
