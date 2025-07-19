@@ -312,4 +312,12 @@ export class SeedService {
       }
     }
   }
+
+  static async seedAllData() {
+    // Simplified version for frontend
+    return this.seedSampleData('current-user')
+  }
 }
+
+export const seedService = new SeedService()
+export default seedService

@@ -154,4 +154,79 @@ export class ContactService {
       createdAt: new Date().toISOString()
     })
   }
+
+  // Simplified method for frontend
+  static async getContacts() {
+    // Mock data for now
+    return [
+      {
+        id: 'contact_1',
+        name: 'John Smith',
+        email: 'john.smith@techcorp.com',
+        phone: '+1-555-0123',
+        company: 'TechCorp Inc.',
+        position: 'CTO',
+        status: 'customer',
+        tags: 'enterprise,tech',
+        notes: 'Key decision maker for enterprise solutions',
+        created_at: new Date().toISOString(),
+        user_id: 'current-user'
+      },
+      {
+        id: 'contact_2',
+        name: 'Sarah Johnson',
+        email: 'sarah.j@innovate.io',
+        phone: '+1-555-0124',
+        company: 'Innovate Solutions',
+        position: 'Product Manager',
+        status: 'prospect',
+        tags: 'saas,product',
+        notes: 'Interested in our SaaS platform',
+        created_at: new Date().toISOString(),
+        user_id: 'current-user'
+      },
+      {
+        id: 'contact_3',
+        name: 'Michael Chen',
+        email: 'mchen@startup.co',
+        phone: '+1-555-0125',
+        company: 'StartupCo',
+        position: 'Founder',
+        status: 'lead',
+        tags: 'startup,founder',
+        notes: 'Met at tech conference, very interested',
+        created_at: new Date().toISOString(),
+        user_id: 'current-user'
+      },
+      {
+        id: 'contact_4',
+        name: 'Emily Davis',
+        email: 'emily.davis@enterprise.com',
+        phone: '+1-555-0126',
+        company: 'Enterprise Corp',
+        position: 'VP Sales',
+        status: 'prospect',
+        tags: 'enterprise,sales',
+        notes: 'Looking for team collaboration tools',
+        created_at: new Date().toISOString(),
+        user_id: 'current-user'
+      },
+      {
+        id: 'contact_5',
+        name: 'David Wilson',
+        email: 'dwilson@agency.com',
+        phone: '+1-555-0127',
+        company: 'Creative Agency',
+        position: 'Creative Director',
+        status: 'lead',
+        tags: 'agency,creative',
+        notes: 'Needs project management solution',
+        created_at: new Date().toISOString(),
+        user_id: 'current-user'
+      }
+    ]
+  }
 }
+
+export const contactService = new ContactService()
+export default contactService
